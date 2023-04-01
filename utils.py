@@ -2,6 +2,7 @@ import sys
 from random import randint
 import numpy as np 
 import gym 
+from ActionWrapper import ProAdvAction
 
 def observe(env, replay_buffer, observation_steps, max_steps_per_episode):
     time_steps = 0
@@ -55,6 +56,38 @@ def eval(env_id, seed, policy, episodes, reward_threshold, max_steps_per_episode
     render_at = randint(0, episodes) 
     while ep < episodes:
         action = policy.select_action(np.array(obs))
+        new_obs, reward, done, _ = eval_env.step(action)
+        if ep == render_at and render:
+            eval_env.render()
+        episode_reward += reward
+        episode_steps += 1
+        obs = new_obs
+        if done or episode_reward > reward_threshold or episode_steps >= max_steps_per_episode:
+            rewards.append(episode_reward)
+            episode_reward = 0
+            episode_steps = 0
+            if ep == render_at and render:
+                eval_env.render(close=True)
+            obs = eval_env.reset()
+            ep += 1
+    
+    print("\n---------------------------------------")
+    print(f"Evaluation over {episodes} episodes: {np.mean(rewards):.3f}")
+    print("---------------------------------------\n")
+    return rewards
+
+def eval_with_adv(env_id, seed, policy, adv_policy, episodes, reward_threshold, max_steps_per_episode, render=False):
+    eval_env = gym.make(env_id)
+    eval_env.update_adversary(adv_policy.limit)
+    eval_env.seed(seed)
+    obs = eval_env.reset()
+    rewards = []
+    episode_reward = 0
+    episode_steps = 0
+    ep = 0
+    render_at = randint(0, episodes) 
+    while ep < episodes:
+        action = ProAdvAction(pro = policy.select_action(np.array(obs)), adv = adv_policy.select_action(np.array(obs)))
         new_obs, reward, done, _ = eval_env.step(action)
         if ep == render_at and render:
             eval_env.render()
