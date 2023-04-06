@@ -9,8 +9,8 @@ from utils import train, eval, observe
 
 best_observed_rarl = -1
 best_observed_baseline = -1 
-RARL_REWARDS = []
-BASELINE_REWARDS = []
+RARL_REWARDS = np.zeros((config.NUM_EXPERIMENTS * config.EVAL_EPISODES, config.RARL_LOOPS))
+BASELINE_REWARDS = np.zeros((config.NUM_EXPERIMENTS * config.EVAL_EPISODES, config.RARL_LOOPS))
 
 for ex in range(config.NUM_EXPERIMENTS):
     
@@ -24,7 +24,7 @@ for ex in range(config.NUM_EXPERIMENTS):
     state_dim = adv_env.observation_space.shape[0]
     pro_action_dim = adv_env.action_space.shape[0] 
     adv_action_dim = adv_env.adv_action_space.shape[0] 
-
+    
     #get protagonist and antagonist limits
     pro_limit = float(adv_env.action_space.high[0])
     adv_env_adv_limit = float(adv_env.adv_action_space.high[0])
@@ -48,9 +48,6 @@ for ex in range(config.NUM_EXPERIMENTS):
     observe(base_env, base_env_replay_buffer, config.INITIAL_OBSERVATION_STEPS, config.MAX_STEPS_PER_EPISODE)
     observe(adv_env, adv_env_replay_buffer, config.INITIAL_OBSERVATION_STEPS, config.MAX_STEPS_PER_EPISODE)
 
-    rarl_rewards = []
-    baseline_rewards = []
-
     for i in range(config.RARL_LOOPS):
         #train protagonist
         print("\nTraining RARL: ", i, "\n")
@@ -71,8 +68,8 @@ for ex in range(config.NUM_EXPERIMENTS):
         baseline_reward = eval(config.ENV, config.SEED, base_env_pro_policy, config.EVAL_EPISODES, config.REWARD_THRESH, config.MAX_STEPS_PER_EPISODE)
 
         #store results
-        rarl_rewards.append(np.mean(rarl_reward))
-        baseline_rewards.append(np.mean(baseline_reward))
+        RARL_REWARDS[int(ex*config.EVAL_EPISODES):int(ex*config.EVAL_EPISODES) + config.EVAL_EPISODES, i] = rarl_reward
+        BASELINE_REWARDS[int(ex*config.EVAL_EPISODES):int(ex*config.EVAL_EPISODES) + config.EVAL_EPISODES, i] = baseline_reward
 
         if np.mean(rarl_reward) >= best_observed_rarl:
             adv_env_pro_policy.save(config.SAVE_DIR + 'best_rarl_pro')
@@ -82,9 +79,6 @@ for ex in range(config.NUM_EXPERIMENTS):
         if np.mean(baseline_reward) >= best_observed_baseline:
             base_env_pro_policy.save(config.SAVE_DIR + 'best_baseline')
             best_observed_baseline = np.mean(baseline_reward)
-
-    RARL_REWARDS.append(rarl_rewards)
-    BASELINE_REWARDS.append(baseline_rewards)
 
 with open(config.SAVE_DIR + 'results.npy', 'wb') as f:
     np.save(f, np.array(RARL_REWARDS))

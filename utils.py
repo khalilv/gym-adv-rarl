@@ -79,7 +79,9 @@ def eval(env_id, seed, policy, episodes, reward_threshold, max_steps_per_episode
 def eval_manual_adv(env_id, seed, policy, episodes, reward_threshold, max_steps_per_episode, max_strength, adv_dim, render=False):
     eval_env = gym.make(env_id)
     eval_env.update_adversary(max_strength)
+    print(adv_dim,"ADV_DIM")
     eval_env.seed(seed)
+    np.random.seed(seed)
     obs = eval_env.reset()
     rewards = []
     episode_reward = 0
@@ -87,8 +89,10 @@ def eval_manual_adv(env_id, seed, policy, episodes, reward_threshold, max_steps_
     ep = 0
     render_at = randint(0, episodes) 
     while ep < episodes:
+        #define adv action here
         adv_action = np.zeros(adv_dim)
-        adv_action[0] = -max_strength #define adversary force 
+        adv_action[0] = np.random.uniform(-max_strength, 0)
+        adv_action[1] =  np.random.uniform(-max_strength, max_strength)  
         action = ProAdvAction(pro = policy.select_action(np.array(obs)), adv = adv_action)
         new_obs, reward, done, _ = eval_env.step(action)
         if ep == render_at and render:
