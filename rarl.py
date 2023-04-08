@@ -7,13 +7,13 @@ import config
 from matplotlib import pyplot as plt
 from utils import train, eval, observe
 
-best_observed_rarl = -1
-best_observed_baseline = -1 
 RARL_REWARDS = np.zeros((config.NUM_EXPERIMENTS * config.EVAL_EPISODES, config.RARL_LOOPS))
 BASELINE_REWARDS = np.zeros((config.NUM_EXPERIMENTS * config.EVAL_EPISODES, config.RARL_LOOPS))
 
 for ex in range(config.NUM_EXPERIMENTS):
     
+    best_observed_rarl = -1
+    best_observed_baseline = -1 
     #setup environments 
     adv_env = gym.make(config.ENV)
     base_env = gym.make(config.ENV)
@@ -72,12 +72,12 @@ for ex in range(config.NUM_EXPERIMENTS):
         BASELINE_REWARDS[int(ex*config.EVAL_EPISODES):int(ex*config.EVAL_EPISODES) + config.EVAL_EPISODES, i] = baseline_reward
 
         if np.mean(rarl_reward) >= best_observed_rarl:
-            adv_env_pro_policy.save(config.SAVE_DIR + 'best_rarl_pro')
-            adv_env_adv_policy.save(config.SAVE_DIR + 'best_rarl_adv')
+            adv_env_pro_policy.save(config.SAVE_DIR + 'best_rarl_pro_' + str(ex))
+            adv_env_adv_policy.save(config.SAVE_DIR + 'best_rarl_adv_' + str(ex))
             best_observed_rarl = np.mean(rarl_reward)
 
         if np.mean(baseline_reward) >= best_observed_baseline:
-            base_env_pro_policy.save(config.SAVE_DIR + 'best_baseline')
+            base_env_pro_policy.save(config.SAVE_DIR + 'best_baseline_' + str(ex))
             best_observed_baseline = np.mean(baseline_reward)
 
 with open(config.SAVE_DIR + 'results.npy', 'wb') as f:
@@ -88,7 +88,7 @@ with open(config.SAVE_DIR + 'results.npy', 'wb') as f:
 #plot results 
 x = np.arange(config.RARL_LOOPS)
 RARL_mean = np.mean(RARL_REWARDS, axis=0)
-RARL_std = np.std(BASELINE_REWARDS, axis=0)
+RARL_std = np.std(RARL_REWARDS, axis=0)
 BASELINE_mean = np.mean(BASELINE_REWARDS, axis=0)
 BASELINE_std = np.std(BASELINE_REWARDS, axis=0)
 plt.plot(x, RARL_mean, linestyle='-', color = 'g', label = 'RARL')

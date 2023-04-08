@@ -1,7 +1,7 @@
 1) Add new learning algorithm (MPO, PPO, TRPO) - Ben 
 2) Evaluate learned policies on pure environment - Khalil 
-3) Evaluate learned policies with different (friction or mass) values - Khalil
-4) Evaluate learned policies with learned adversary - Julie? 
+3) Evaluate learned policies with different mass values - Khalil
+4) Evaluate learned policies with manual adversary - Julie? 
 5) (If time but probably not) Train and get learning curves with different strengths of adversary (will probably take lots of computation time but could be cool)
 6) Report - Khalil, Julie, Ben
 7) Video - Khalil, Julie, Ben 
