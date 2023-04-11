@@ -93,8 +93,8 @@ def eval_manual_adv(env_id, seed, policy, episodes, reward_threshold, max_steps_
         adv_action = np.zeros(adv_dim)
         
         #pendulum 
-        adv_action[0] = np.random.uniform(-max_strength, max_strength)
-        adv_action[1] = np.random.uniform(-max_strength, max_strength)
+        # adv_action[0] = np.random.uniform(-max_strength, max_strength)
+        # adv_action[1] = np.random.uniform(-max_strength, max_strength)
         
         #hopper
         # adv_action[0] = np.random.uniform(-max_strength,0)
