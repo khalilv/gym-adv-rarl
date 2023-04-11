@@ -6,7 +6,7 @@ import numpy as np
 from matplotlib import pyplot as plt 
 
 EVAL_EPISODES = 100
-STRENGTHS = [0,5,10,15,20,25,30]
+STRENGTHS = [0,5,10,15,20,25,30,35,40,45,50]
 RARL_mean = []
 RARL_std = []
 BASELINE_mean = []
