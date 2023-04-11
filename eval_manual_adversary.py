@@ -33,8 +33,8 @@ baseline_policy.load(config.SAVE_DIR + 'best_baseline')
 
 
 for strength in STRENGTHS: 
-    rarl_rewards = eval_manual_adv(config.ENV, config.SEED, rarl_policy, EVAL_EPISODES, config.REWARD_THRESH, config.MAX_STEPS_PER_EPISODE, strength, adv_action_dim, False)
-    baseline_rewards = eval_manual_adv(config.ENV, config.SEED, baseline_policy, EVAL_EPISODES, config.REWARD_THRESH, config.MAX_STEPS_PER_EPISODE, strength, adv_action_dim, False)
+    rarl_rewards = eval_manual_adv(config.ENV, config.SEED, rarl_policy, EVAL_EPISODES, config.REWARD_THRESH, config.MAX_STEPS_PER_EPISODE, strength, adv_action_dim, True)
+    baseline_rewards = eval_manual_adv(config.ENV, config.SEED, baseline_policy, EVAL_EPISODES, config.REWARD_THRESH, config.MAX_STEPS_PER_EPISODE, strength, adv_action_dim, True)
     RARL_mean.append(np.mean(rarl_rewards))
     RARL_std.append(np.std(rarl_rewards))
     BASELINE_mean.append(np.mean(baseline_rewards))

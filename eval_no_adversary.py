@@ -18,14 +18,14 @@ pro_limit = float(env.action_space.high[0])
 
 #load rarl policy
 rarl_policy = TD3(state_dim, action_dim, config.HIDDEN_LAYER_DIM, pro_limit, False, config.DISCOUNT, config.TAU, config.POLICY_NOISE, config.NOISE_CLIP, config.POLICY_FREQUENCY, config.EXPLORE_NOISE)
-rarl_policy.load(config.SAVE_DIR + 'best_rarl_pro_4')
+rarl_policy.load(config.SAVE_DIR + 'best_rarl_pro')
 
 #load baseline policy 
 baseline_policy = TD3(state_dim, action_dim, config.HIDDEN_LAYER_DIM, pro_limit, False, config.DISCOUNT, config.TAU, config.POLICY_NOISE, config.NOISE_CLIP, config.POLICY_FREQUENCY, config.EXPLORE_NOISE)
-baseline_policy.load(config.SAVE_DIR + 'best_baseline_4')
+baseline_policy.load(config.SAVE_DIR + 'best_baseline')
 
-rarl_rewards = eval(config.ENV, config.SEED, rarl_policy, EVAL_EPISODES, config.REWARD_THRESH, config.MAX_STEPS_PER_EPISODE, False)
-baseline_rewards = eval(config.ENV, config.SEED, baseline_policy, EVAL_EPISODES, config.REWARD_THRESH, config.MAX_STEPS_PER_EPISODE, False)
+rarl_rewards = eval(config.ENV, config.SEED, rarl_policy, EVAL_EPISODES, config.REWARD_THRESH, config.MAX_STEPS_PER_EPISODE, True)
+baseline_rewards = eval(config.ENV, config.SEED, baseline_policy, EVAL_EPISODES, config.REWARD_THRESH, config.MAX_STEPS_PER_EPISODE, True)
 
 print(np.mean(rarl_rewards), np.std(rarl_rewards))
 print(np.mean(baseline_rewards), np.std(baseline_rewards))
