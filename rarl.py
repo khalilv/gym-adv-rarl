@@ -1,14 +1,16 @@
 import numpy as np
 import gym
-from td3 import TD3
-from replay_buffer import ReplayBuffer
+from ppo import PPO
+from networks import FeedForwardNN
 from runner import Runner
 import config
 from matplotlib import pyplot as plt
-from utils import train, eval, observe
+from utils import train, test
 
 RARL_REWARDS = np.zeros((config.NUM_EXPERIMENTS * config.EVAL_EPISODES, config.RARL_LOOPS))
 BASELINE_REWARDS = np.zeros((config.NUM_EXPERIMENTS * config.EVAL_EPISODES, config.RARL_LOOPS))
+
+
 
 for ex in range(config.NUM_EXPERIMENTS):
     
@@ -30,42 +32,47 @@ for ex in range(config.NUM_EXPERIMENTS):
     adv_env_adv_limit = float(adv_env.adv_action_space.high[0])
     base_env_adv_limit = float(base_env.adv_action_space.high[0]) #should be 0
 
-    #create policies 
-    adv_env_pro_policy = TD3(state_dim, pro_action_dim, config.HIDDEN_LAYER_DIM, pro_limit, False, config.DISCOUNT, config.TAU, config.POLICY_NOISE, config.NOISE_CLIP, config.POLICY_FREQUENCY, config.EXPLORE_NOISE)
-    adv_env_adv_policy = TD3(state_dim, adv_action_dim, config.HIDDEN_LAYER_DIM, adv_env_adv_limit, True, config.DISCOUNT, config.TAU, config.POLICY_NOISE, config.NOISE_CLIP, config.POLICY_FREQUENCY, config.EXPLORE_NOISE)
-    base_env_pro_policy = TD3(state_dim, pro_action_dim, config.HIDDEN_LAYER_DIM, pro_limit, False, config.DISCOUNT, config.TAU, config.POLICY_NOISE, config.NOISE_CLIP, config.POLICY_FREQUENCY, config.EXPLORE_NOISE)
-    base_env_adv_policy = TD3(state_dim, adv_action_dim, config.HIDDEN_LAYER_DIM, base_env_adv_limit, True, config.DISCOUNT, config.TAU, config.POLICY_NOISE, config.NOISE_CLIP, config.POLICY_FREQUENCY, config.EXPLORE_NOISE)
 
-    #create replay buffers 
-    adv_env_replay_buffer = ReplayBuffer(config.MAX_REPLAY_BUFFER_SIZE)
-    base_env_replay_buffer = ReplayBuffer(config.MAX_REPLAY_BUFFER_SIZE)
+    hyperparameters = {
+				'timesteps_per_batch': config.TIMESTEPS_PER_BATCH, 
+				'max_timesteps_per_episode': config.MAX_STEPS_PER_EPISODE, 
+				'gamma': config.DISCOUNT, 
+				'n_updates_per_iteration': config.N_UPDATES_PER_ITERATION,
+				'lr': config.LR, 
+				'clip': config.POLICY_CLIP,
+				'render': False,
+				'render_every_i': 10
+			  }
+    
+    #create policies self, state_dim, action_dim, hidden_dim, limit, is_adv, gamma=0.99, gae_lambda=0.95, policy_clip=0.2, batch_size=64, N=2048, n_epochs=10
+    adv_env_pro_policy = PPO(policy_class=FeedForwardNN, env=adv_env, is_adv=False, is_rarl=True, **hyperparameters)
+    adv_env_adv_policy = PPO(policy_class=FeedForwardNN, env=adv_env, is_adv=True, is_rarl=False, **hyperparameters)
+    base_env_pro_policy = PPO(policy_class=FeedForwardNN, env=base_env, is_adv=False, is_rarl=False, **hyperparameters)
+    base_env_adv_policy = PPO(policy_class=FeedForwardNN, env=base_env, is_adv=True, is_rarl=False, **hyperparameters)
 
     #create runners
-    adv_env_runner = Runner(adv_env, adv_env_pro_policy, adv_env_adv_policy, adv_env_replay_buffer)
-    base_env_runner = Runner(base_env, base_env_pro_policy, base_env_adv_policy, base_env_replay_buffer)
+    adv_env_runner = Runner(adv_env, adv_env_pro_policy, adv_env_adv_policy)
+    base_env_runner = Runner(base_env, base_env_pro_policy, base_env_adv_policy)
 
-    #fill in replay buffers with random actions
-    observe(base_env, base_env_replay_buffer, config.INITIAL_OBSERVATION_STEPS, config.MAX_STEPS_PER_EPISODE)
-    observe(adv_env, adv_env_replay_buffer, config.INITIAL_OBSERVATION_STEPS, config.MAX_STEPS_PER_EPISODE)
 
     for i in range(config.RARL_LOOPS):
         #train protagonist
         print("\nTraining RARL: ", i, "\n")
-        train(adv_env_pro_policy, config.N_TRAINING, adv_env_replay_buffer, adv_env_runner, config.BATCH_SIZE, config.REWARD_THRESH, config.MAX_STEPS_PER_EPISODE)
+        train(adv_env_pro_policy, config.N_TRAINING, actor_model='', critic_model='') #Don't need to pass adversary, as it is linked via the runner
         
         #train adversary
         print("\nTraining RARL adversary: ", i, "\n")
-        train(adv_env_adv_policy, config.N_TRAINING, adv_env_replay_buffer, adv_env_runner, config.BATCH_SIZE, config.REWARD_THRESH, config.MAX_STEPS_PER_EPISODE)
+        train(adv_env_adv_policy, config.N_TRAINING, actor_model='', critic_model='')
 
         #train baseline (zero strength adversary)
         print("\nTraining baseline: ", i, "\n")
-        train(base_env_pro_policy, config.N_TRAINING, base_env_replay_buffer, base_env_runner, config.BATCH_SIZE, config.REWARD_THRESH, config.MAX_STEPS_PER_EPISODE)
+        train(base_env_pro_policy , config.N_TRAINING, actor_model='', critic_model='')
         
         #evaluate RARL
-        rarl_reward = eval(config.ENV, config.SEED, adv_env_pro_policy,config.EVAL_EPISODES, config.REWARD_THRESH, config.MAX_STEPS_PER_EPISODE)
+        rarl_reward = test(config.ENV, config.SEED, adv_env_pro_policy, config.EVAL_EPISODES, config.MAX_STEPS_PER_EPISODE, config.REWARD_THRESH)
         
         #evaluate baseline
-        baseline_reward = eval(config.ENV, config.SEED, base_env_pro_policy, config.EVAL_EPISODES, config.REWARD_THRESH, config.MAX_STEPS_PER_EPISODE)
+        baseline_reward = test(config.ENV, config.SEED, base_env_pro_policy, config.EVAL_EPISODES, config.MAX_STEPS_PER_EPISODE, config.REWARD_THRESH)
 
         #store results
         RARL_REWARDS[int(ex*config.EVAL_EPISODES):int(ex*config.EVAL_EPISODES) + config.EVAL_EPISODES, i] = rarl_reward
@@ -81,7 +88,7 @@ for ex in range(config.NUM_EXPERIMENTS):
             best_observed_baseline = np.mean(baseline_reward)
 
 with open(config.SAVE_DIR + 'results.npy', 'wb') as f:
-    np.save(f, np.array(RARL_REWARDS))
+   # np.save(f, np.array(RARL_REWARDS))
     np.save(f, np.array(BASELINE_REWARDS))
 
 
