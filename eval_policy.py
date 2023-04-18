@@ -90,5 +90,5 @@ def eval_policy(policy, env, eval_episodes, max_timesteps, rew_thresh, render=Fa
 
 	# Rollout with the policy and environment, and log each episode's data
 	ret_arr, len_arr = rollout(policy, env, eval_episodes, max_timesteps, rew_thresh, render)
-	_log_summary(ep_len=np.mean(ret_arr), ep_ret=np.mean(len_arr), eval_episodes=eval_episodes)
+	_log_summary(ep_len=np.mean(len_arr), ep_ret=np.mean(ret_arr), eval_episodes=eval_episodes)
 	return ret_arr
