@@ -1,6 +1,6 @@
 from utils import eval_manual_adv
 import config
-from td3 import TD3
+from ppo_old import PPO
 import gym 
 import numpy as np 
 from matplotlib import pyplot as plt 
@@ -24,11 +24,11 @@ adv_action_dim = env.adv_action_space.shape[0]
 pro_limit = float(env.action_space.high[0])
 
 #load rarl policy
-rarl_policy = TD3(state_dim, action_dim, config.HIDDEN_LAYER_DIM, pro_limit, False, config.DISCOUNT, config.TAU, config.POLICY_NOISE, config.NOISE_CLIP, config.POLICY_FREQUENCY, config.EXPLORE_NOISE)
+rarl_policy = PPO(state_dim, action_dim, config.HIDDEN_LAYER_DIM, pro_limit, False, config.DISCOUNT, config.GAE_LAMBDA, config.POLICY_CLIP, config.BATCH_SIZE, config.N, config.N_EPOCHS, config.EXPLORE_NOISE)
 rarl_policy.load(config.SAVE_DIR + 'best_rarl_pro')
 
 #load baseline policy 
-baseline_policy = TD3(state_dim, action_dim, config.HIDDEN_LAYER_DIM, pro_limit, False, config.DISCOUNT, config.TAU, config.POLICY_NOISE, config.NOISE_CLIP, config.POLICY_FREQUENCY, config.EXPLORE_NOISE)
+baseline_policy = PPO(state_dim, action_dim, config.HIDDEN_LAYER_DIM, pro_limit, False, config.DISCOUNT, config.GAE_LAMBDA, config.POLICY_CLIP, config.BATCH_SIZE, config.N, config.N_EPOCHS, config.EXPLORE_NOISE)
 baseline_policy.load(config.SAVE_DIR + 'best_baseline')
 
 

@@ -1,4 +1,4 @@
-from networks import Actor, Critic
+from networks_old import Actor, Critic
 import torch 
 import numpy as np 
 import torch.nn.functional as F
