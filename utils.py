@@ -127,13 +127,17 @@ def eval_manual_adv(env_id, seed, policy, episodes, reward_threshold, max_steps_
         # adv_action[0] = np.random.uniform(-max_strength,max_strength)
         # adv_action[1] = np.random.uniform(-max_strength, max_strength)
 
-        #halfcheetah
+        #hopper
         adv_action[0] = np.random.uniform(-max_strength,0)
         adv_action[1] = np.random.uniform(-max_strength, max_strength)
-        adv_action[2] = np.random.uniform(-max_strength,0)
-        adv_action[3] = np.random.uniform(-max_strength, max_strength)
-        adv_action[4] = np.random.uniform(-max_strength,0)
-        adv_action[5] = np.random.uniform(-max_strength, max_strength)
+
+        #halfcheetah
+        # adv_action[0] = np.random.uniform(-max_strength,0)
+        # adv_action[1] = np.random.uniform(-max_strength, max_strength)
+        # adv_action[2] = np.random.uniform(-max_strength,0)
+        # adv_action[3] = np.random.uniform(-max_strength, max_strength)
+        # adv_action[4] = np.random.uniform(-max_strength,0)
+        # adv_action[5] = np.random.uniform(-max_strength, max_strength)
         
         action = ProAdvAction(pro = policy.get_action(np.array(obs))[0], adv = adv_action)
         new_obs, reward, done, _ = eval_env.step(action)
