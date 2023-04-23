@@ -15,6 +15,11 @@ class HopperHeelEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         low_adv = -high_adv
         self.adv_action_space = spaces.Box(low_adv, high_adv)
         self.pro_action_space = self.action_space
+        # mass_ind = self.model.body_names.index(b'torso')
+        # me = np.array(self.model.body_mass)
+        # me[mass_ind,0] = 5.5
+        # self.model.body_mass = me
+        # print(bnames, self.model.body_mass)
 
     def _adv_to_xfrc(self, adv_act):
         new_xfrc = self.model.data.xfrc_applied*0.0

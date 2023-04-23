@@ -17,7 +17,7 @@ class InvertedPendulumEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         self.pro_action_space = self.action_space
         # mass_ind = self.model.body_names.index(b'pole')
         # me = np.array(self.model.body_mass)
-        # me[mass_ind,0] = 60
+        # me[mass_ind,0] = 100
         # self.model.body_mass = me
         # print(bnames, self.model.body_mass)
 
