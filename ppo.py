@@ -147,14 +147,14 @@ class PPO:
 			# Print a summary of our training so far
 			self._log_summary()
 
-			# Save our model if it's time -> note this is only saving for evalution purposes. For general saving see the save() function
-			if i_so_far % self.save_freq == 0 or t_so_far >= total_timesteps:
-				if self.is_rarl:
-					torch.save(self.actor.state_dict(), './ppo_actor_rarl.pth')
-					torch.save(self.critic.state_dict(), './ppo_critic_rarl.pth')
-				elif not self.is_adv:
-					torch.save(self.actor.state_dict(), './ppo_actor_base.pth')
-					torch.save(self.critic.state_dict(), './ppo_critic_base.pth')
+			# # Save our model if it's time -> note this is only saving for evalution purposes. For general saving see the save() function
+			# if i_so_far % self.save_freq == 0 or t_so_far >= total_timesteps:
+			# 	if self.is_rarl:
+			# 		torch.save(self.actor.state_dict(), './ppo_actor_rarl.pth')
+			# 		torch.save(self.critic.state_dict(), './ppo_critic_rarl.pth')
+			# 	elif not self.is_adv:
+			# 		torch.save(self.actor.state_dict(), './ppo_actor_base.pth')
+			# 		torch.save(self.critic.state_dict(), './ppo_critic_base.pth')
 
 	#calls runner.rollout, which is in charge of combining adv and pro actions to pass to gym, and record the transiitons. 
 	def rollout(self): 

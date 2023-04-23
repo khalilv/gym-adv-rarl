@@ -5,7 +5,7 @@ from networks import FeedForwardNN
 from runner import Runner
 import config
 from matplotlib import pyplot as plt
-from utils import train, test
+from utils import train, test, eval_manual_adv
 
 RARL_REWARDS = np.zeros((config.NUM_EXPERIMENTS * config.EVAL_EPISODES, config.RARL_LOOPS))
 BASELINE_REWARDS = np.zeros((config.NUM_EXPERIMENTS * config.EVAL_EPISODES, config.RARL_LOOPS))
@@ -72,7 +72,7 @@ for ex in range(config.NUM_EXPERIMENTS):
         rarl_reward = test(config.ENV, config.SEED, adv_env_pro_policy, config.EVAL_EPISODES, config.MAX_STEPS_PER_EPISODE, config.REWARD_THRESH)
         
         #evaluate baseline
-        baseline_reward = test(config.ENV, config.SEED, base_env_pro_policy, config.EVAL_EPISODES, config.MAX_STEPS_PER_EPISODE, config.REWARD_THRESH)
+        baseline_reward = test(config.ENV, config.SEED, adv_env_pro_policy, config.EVAL_EPISODES, config.MAX_STEPS_PER_EPISODE, config.REWARD_THRESH)
 
         #store results
         RARL_REWARDS[int(ex*config.EVAL_EPISODES):int(ex*config.EVAL_EPISODES) + config.EVAL_EPISODES, i] = rarl_reward

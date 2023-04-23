@@ -135,7 +135,7 @@ def eval_manual_adv(env_id, seed, policy, episodes, reward_threshold, max_steps_
         adv_action[4] = np.random.uniform(-max_strength,0)
         adv_action[5] = np.random.uniform(-max_strength, max_strength)
         
-        action = ProAdvAction(pro = policy.select_action(np.array(obs)), adv = adv_action)
+        action = ProAdvAction(pro = policy.get_action(np.array(obs))[0], adv = adv_action)
         new_obs, reward, done, _ = eval_env.step(action)
         if ep == render_at and render:
             eval_env.render()

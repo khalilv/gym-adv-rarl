@@ -1,6 +1,7 @@
 from utils import eval_manual_adv
 import config
-from ppo_old import PPO
+from ppo import PPO
+from networks import FeedForwardNN
 import gym 
 import numpy as np 
 from matplotlib import pyplot as plt 
@@ -11,6 +12,17 @@ RARL_mean = []
 RARL_std = []
 BASELINE_mean = []
 BASELINE_std = []
+hyperparameters = {
+            'timesteps_per_batch': config.TIMESTEPS_PER_BATCH, 
+            'max_timesteps_per_episode': config.MAX_STEPS_PER_EPISODE, 
+            'gamma': config.DISCOUNT, 
+            'n_updates_per_iteration': config.N_UPDATES_PER_ITERATION,
+            'lr': config.LR, 
+            'clip': config.POLICY_CLIP,
+            'render': False,
+            'render_every_i': 10
+            }
+
 
 #setup environments 
 env = gym.make(config.ENV)
@@ -24,17 +36,17 @@ adv_action_dim = env.adv_action_space.shape[0]
 pro_limit = float(env.action_space.high[0])
 
 #load rarl policy
-rarl_policy = PPO(state_dim, action_dim, config.HIDDEN_LAYER_DIM, pro_limit, False, config.DISCOUNT, config.GAE_LAMBDA, config.POLICY_CLIP, config.BATCH_SIZE, config.N, config.N_EPOCHS, config.EXPLORE_NOISE)
-rarl_policy.load(config.SAVE_DIR + 'best_rarl_pro')
+rarl_policy = PPO(policy_class=FeedForwardNN, env=env, is_adv=False, is_rarl=True, **hyperparameters)
+rarl_policy.load(config.SAVE_DIR + 'best_rarl_pro' + '_0') #TODO make sure to change to the best experiment number 
 
 #load baseline policy 
-baseline_policy = PPO(state_dim, action_dim, config.HIDDEN_LAYER_DIM, pro_limit, False, config.DISCOUNT, config.GAE_LAMBDA, config.POLICY_CLIP, config.BATCH_SIZE, config.N, config.N_EPOCHS, config.EXPLORE_NOISE)
-baseline_policy.load(config.SAVE_DIR + 'best_baseline')
+baseline_policy = PPO(policy_class=FeedForwardNN, env=env, is_adv=False, is_rarl=False, **hyperparameters)
+baseline_policy.load(config.SAVE_DIR + 'best_baseline' + '_0') #TODO make sure to change to the best experiment number 
 
 
 for strength in STRENGTHS: 
-    rarl_rewards = eval_manual_adv(config.ENV, config.SEED, rarl_policy, EVAL_EPISODES, config.REWARD_THRESH, config.MAX_STEPS_PER_EPISODE, strength, adv_action_dim, True)
-    baseline_rewards = eval_manual_adv(config.ENV, config.SEED, baseline_policy, EVAL_EPISODES, config.REWARD_THRESH, config.MAX_STEPS_PER_EPISODE, strength, adv_action_dim, True)
+    rarl_rewards = eval_manual_adv(config.ENV, config.SEED, rarl_policy, EVAL_EPISODES, config.REWARD_THRESH, config.MAX_STEPS_PER_EPISODE, strength, adv_action_dim, False)
+    baseline_rewards = eval_manual_adv(config.ENV, config.SEED, baseline_policy, EVAL_EPISODES, config.REWARD_THRESH, config.MAX_STEPS_PER_EPISODE, strength, adv_action_dim, False)
     RARL_mean.append(np.mean(rarl_rewards))
     RARL_std.append(np.std(rarl_rewards))
     BASELINE_mean.append(np.mean(baseline_rewards))
