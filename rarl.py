@@ -78,6 +78,10 @@ for ex in range(config.NUM_EXPERIMENTS):
         RARL_REWARDS[int(ex*config.EVAL_EPISODES):int(ex*config.EVAL_EPISODES) + config.EVAL_EPISODES, i] = rarl_reward
         BASELINE_REWARDS[int(ex*config.EVAL_EPISODES):int(ex*config.EVAL_EPISODES) + config.EVAL_EPISODES, i] = baseline_reward
 
+        with open(config.SAVE_DIR + 'results.npy', 'wb') as f:
+            np.save(f, np.array(RARL_REWARDS))
+            np.save(f, np.array(BASELINE_REWARDS))
+
         if np.mean(rarl_reward) >= best_observed_rarl:
             adv_env_pro_policy.save(config.SAVE_DIR + 'best_rarl_pro_' + str(ex))
             adv_env_adv_policy.save(config.SAVE_DIR + 'best_rarl_adv_' + str(ex))
@@ -87,9 +91,6 @@ for ex in range(config.NUM_EXPERIMENTS):
             base_env_pro_policy.save(config.SAVE_DIR + 'best_baseline_' + str(ex))
             best_observed_baseline = np.mean(baseline_reward)
 
-with open(config.SAVE_DIR + 'results.npy', 'wb') as f:
-   # np.save(f, np.array(RARL_REWARDS))
-    np.save(f, np.array(BASELINE_REWARDS))
 
 
 #plot results 
@@ -103,7 +104,7 @@ plt.fill_between(x, np.subtract(RARL_mean, RARL_std), np.add(RARL_mean, RARL_std
 plt.plot(x, BASELINE_mean, linestyle='-', color = 'b', label = 'Baseline')
 plt.fill_between(x, np.subtract(BASELINE_mean, BASELINE_std), np.add(BASELINE_mean, BASELINE_std), color='lightblue', alpha=0.3)
 plt.legend()
-plt.xlabel('Episodes')
+plt.xlabel('Training Iterations')
 plt.ylabel('Reward')
 plt.title(config.ENV)
 plt.savefig(config.SAVE_DIR + 'results.png')
